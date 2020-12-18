@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Gremlin.Net.Driver;
 using Gremlin.Net.Driver.Remote;
 using Gremlin.Net.Process.Traversal;
@@ -9,7 +10,7 @@ namespace ImporterCS
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             // Connect to the Gremlin server and create the graph traversal source
             var gremlinServer = new GremlinServer("localhost", 8182);
@@ -17,9 +18,9 @@ namespace ImporterCS
             var driverRemoteConnection = new DriverRemoteConnection(gremlinClient);
             GraphTraversalSource g = AnonymousTraversalSource.Traversal().WithRemote(driverRemoteConnection);
             
-            // Create an index for the "userId" property ... if you can! The author cound not find a way to create a TinkerGraph index from
-            // a C# program.
-
+            // Create an index for the "userId" property
+            await gremlinClient.SubmitAsync("graph.createIndex('userId', Vertex.class)");
+            
             string[] lines = File.ReadAllLines(@"C:\Temp\Wiki-Vote.txt");
             foreach (string line in lines)
             {
